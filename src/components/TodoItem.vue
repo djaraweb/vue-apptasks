@@ -1,25 +1,49 @@
 <template>
-  <div class="todo-item">
+  <div class="todo-item" :class="{'border-todo-item': editing}">
     <div class="todo-item-left">
-      <input type="checkbox" v-model="completed" @change="doneEdit" />
+      <input type="checkbox" v-model="todo.completed" @change="doneEdit" style="display: none" />
+      <div class="btn-action" @click="onChecked">
+        <i v-if="!todo.completed" class="fa fa-square-o"></i>
+        <i v-else class="fa fa-check-square-o"></i>
+      </div>
+
       <div
         v-if="!editing"
-        @dblclick="editTodo"
         class="todo-item-label"
-        :class="{ completed: completed }"
-      >{{ title }}</div>
+        :class="{ completed: todo.completed }"
+      >{{ todo.title }}</div>
       <input
         v-else
         type="text"
         class="todo-item-edit"
-        @blur="doneEdit"
         @keyup.enter="doneEdit"
         @keyup.esc="cancelEdit"
-        v-model="title"
+        v-model="beforeEditCache"
         v-focus
       />
     </div>
-    <div class="remove-item" @click="removeTodo(index)">&times;</div>
+    <div class="btn-action" :class="{'hide-btn': !editing}" @click="doneEdit">
+      <i class="fa fa-check"></i>
+    </div>
+    <div class="btn-action" :class="{'hide-btn': !editing}" @click="cancelEdit">
+      <i class="fa fa-close"></i>
+    </div>
+    <div
+      class="btn-action"
+      :class="{'hide-btn': editing, 'completed': todo.completed}"
+      @click="editTodo(index)"
+      style="margin-top: 1px"
+    >
+      <i class="fa fa-edit"></i>
+    </div>
+    <div
+      class="btn-action"
+      :class="{'hide-btn': editing, 'completed': todo.completed}"
+      @click="removeTodo(index)"
+    >
+      <!-- &times;-->
+      <i class="fa fa-trash"></i>
+    </div>
   </div>
 </template>
 <script>
@@ -27,10 +51,7 @@ export default {
   name: "todo-item",
   data() {
     return {
-      id: this.todo.id,
-      title: this.todo.title,
-      completed: this.todo.completed,
-      editing: this.todo.editing,
+      editing: false,
       beforeEditCache: ""
     };
   },
@@ -51,47 +72,48 @@ export default {
   directives: {
     focus: {
       inserted: function(el) {
-        console.log(el);
         el.focus;
       }
     }
   },
+  created() {
+    eventBus.$on("editItem", index => {
+      if (this.index != index) {
+        //console.log("Discarding:", this.index);
+        this.cancelEdit();
+      }
+    });
+  },
   methods: {
     removeTodo(index) {
-      this.$emit("removeTodo", index);
+      eventBus.$emit("removeTodo", index);
     },
-    editTodo() {
-      this.beforeEditCache = this.title;
+    editTodo(index) {
+      this.beforeEditCache = this.todo.title;
       this.editing = true;
+      //console.log("Editing:", index);
+      //console.log("before:", this.beforeEditCache);
+      eventBus.$emit("editItem", index);
     },
     doneEdit() {
-      if (this.title.trim() == "") {
-        this.title = this.beforeEditCache;
-      }
+      //console.log("done:", this.todo.title);
+      this.todo.title = this.beforeEditCache;
       this.editing = false;
-      this.$emit("finishedEdit", {
+      eventBus.$emit("finishedEdit", {
         index: this.index,
-        todo: {
-          id: this.id,
-          title: this.title,
-          completed: this.completed,
-          editing: this.editing
-        }
+        todo: this.todo
       });
     },
     cancelEdit() {
-      this.title = this.beforeEditCache;
       this.editing = false;
+    },
+    onChecked() {
+      this.todo.completed = !this.todo.completed;
     }
   },
   watch: {
     checkAll() {
       this.completed = this.checkAll ? true : this.todo.completed;
-      /*if (this.checkAll) {
-        this.completed = true;
-      } else {
-        this.completed = this.todo.completed;
-      }*/
     }
   }
 };

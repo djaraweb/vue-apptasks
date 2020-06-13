@@ -19,59 +19,61 @@
         :todo="todo"
         :index="index"
         :checkAll="!anyRemaining"
-        @removeTodo="removeTodo"
-        @finishedEdit="finishedEdit"
       />
     </transition-group>
     <div class="extra-container">
-      <div>
-        <label>
-          <input type="checkbox" :checked="!anyRemaining" @change="checkedAllTodos" /> Check All
-        </label>
-      </div>
-      <div>{{ remaining }} items left</div>
+      <TodoCheckAll :anyRemaining="anyRemaining" />
+      <TodoItemsRemaining :remaining="remaining" />
     </div>
     <div class="extra-container">
-      <div>
-        <button :class="{ active: filter == 'all' }" @click="filter = 'all'">All</button>
-        <button :class="{ active: filter == 'active' }" @click="filter = 'active'">Active</button>
-        <button :class="{ active: filter == 'completed' }" @click="filter = 'completed'">Completed</button>
-      </div>
+      <TaskFiltered />
       <div>
         <transition name="fade">
-          <button v-if="showClearCompletedButton" @click="clearCompleted">Clear Completed</button>
+          <TaskClearCompleted :showClearCompletedButton="showClearCompletedButton" />
         </transition>
       </div>
     </div>
+    <div>{{todos}}</div>
   </div>
 </template>
 
 <script>
 import TodoItem from "./TodoItem";
+import TodoItemsRemaining from "./TodoItemsRemaining";
+import TodoCheckAll from "./TodoCheckAll";
+import TaskFiltered from "./TaskFiltered";
+import TaskClearCompleted from "./TaskClearCompleted";
 
 export default {
   name: "TodoList",
   components: {
-    TodoItem
+    TodoItem,
+    TodoItemsRemaining,
+    TodoCheckAll,
+    TaskFiltered,
+    TaskClearCompleted
   },
   data() {
     return {
       newTodo: "",
-      idForTodo: 3,
+      idForTodo: 4,
       beforeEditCache: "",
       filter: "all",
       todos: [
         {
           id: 1,
-          title: "Est ea nulla eiusmod voluptate ut et nulla sint.",
-          completed: false,
-          editing: false
+          title: "Aprender Vue.js",
+          completed: false
         },
         {
           id: 2,
-          title: "Excepteur laboris mollit reprehenderit aute.",
-          completed: false,
-          editing: false
+          title: "Aprender react en udemy.com",
+          completed: false
+        },
+        {
+          id: 3,
+          title: "Grabar leccion de Vue",
+          completed: true
         }
       ]
     };
@@ -79,7 +81,40 @@ export default {
   props: {
     msg: String
   },
-
+  created() {
+    eventBus.$on("removeTodo", index => {
+      this.removeTodo(index);
+    });
+    eventBus.$on("finishedEdit", data => {
+      this.finishedEdit(data);
+    });
+    eventBus.$on("checkedAllTodos", checked => {
+      this.checkedAllTodos(checked);
+    });
+    eventBus.$on("filterChange", filter => {
+      this.filter = filter;
+    });
+    eventBus.$on("clearCompletedTasks", () => {
+      this.clearCompleted();
+    });
+  },
+  beforeDestroy() {
+    eventBus.$off("removeTodo", index => {
+      this.removeTodo(index);
+    });
+    eventBus.$off("finishedEdit", data => {
+      this.finishedEdit(data);
+    });
+    eventBus.$off("checkedAllTodos", checked => {
+      this.checkedAllTodos(checked);
+    });
+    eventBus.$off("filterChange", filter => {
+      this.filter = filter;
+    });
+    eventBus.$off("clearCompletedTasks", () => {
+      this.clearCompleted();
+    });
+  },
   computed: {
     remaining() {
       return this.todos.filter(todo => !todo.completed).length;
@@ -130,6 +165,8 @@ export default {
 
 <style lang="scss">
 @import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css");
+@import url("https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css");
+
 .todo-input {
   display: block;
   width: 100%;
@@ -140,7 +177,6 @@ export default {
   background-color: #fff;
   border: 1px solid #ccc;
   border-radius: 5px;
-
   margin-bottom: 16px;
   &:focus {
     outline: 0;
@@ -148,19 +184,43 @@ export default {
   }
 }
 .todo-item {
-  margin-bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   animation-duration: 0.5s;
+
+  border: 1px solid rgba(197, 197, 193, 0.4);
+  border-radius: 5px;
+  padding-left: 5px;
+  padding-right: 8px;
 }
-.remove-item {
+.border-todo-item {
+  border: 2px solid rgba(46, 108, 202, 0.6);
+}
+.btn-action {
   cursor: pointer;
-  margin-left: 14px;
+  margin-left: 5px;
+  color: #367fa9;
   &:hover {
     color: black;
   }
 }
+.hide-btn {
+  display: none;
+}
+
+.inactive {
+  color: gray;
+}
+/*.remove-item {
+  cursor: pointer;
+  margin-left: 5px;
+  color: #367fa9;
+  &:hover {
+    color: black;
+  }
+}*/
+
 .todo-item-left {
   display: flex;
   align-items: center;
@@ -179,21 +239,10 @@ export default {
   color: #2c3e50;
   margin-left: 12px;
   background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 10px;
-  //font-family: "Avenir", Helvetica, arial, sans-serif;
-
-  /*display: block;
-  width: 100%;
-  height: 45px;
-  padding: 10px 18px;
-  font-size: 18px;
-  color: #555;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  border: 0;
+  /*border: 1px solid #ccc;
   border-radius: 4px;*/
-
+  padding: 10px;
   &:focus {
     outline: none;
   }
@@ -210,6 +259,7 @@ export default {
   border-top: 1px solid lightgrey;
   padding-top: 14px;
   margin-bottom: 14px;
+  margin-top: 10px;
 }
 
 button {
