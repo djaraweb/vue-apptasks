@@ -1,21 +1,21 @@
 <template>
-  <div class="todo-item" :class="{'border-todo-item': editing}">
-    <div class="todo-item-left">
-      <input type="checkbox" v-model="todo.completed" @change="doneEdit" style="display: none" />
+  <div class="task-item" :class="{'border-task-item': editing}">
+    <div class="task-item-left">
+      <input type="checkbox" v-model="task.completed" @change="doneEdit" style="display: none" />
       <div class="btn-action" @click="onChecked">
-        <i v-if="!todo.completed" class="fa fa-square-o"></i>
+        <i v-if="!task.completed" class="fa fa-square-o"></i>
         <i v-else class="fa fa-check-square-o"></i>
       </div>
 
       <div
         v-if="!editing"
-        class="todo-item-label"
-        :class="{ completed: todo.completed }"
-      >{{ todo.title }}</div>
+        class="task-item-label"
+        :class="{ completed: task.completed }"
+      >{{ task.title }}</div>
       <input
         v-else
         type="text"
-        class="todo-item-edit"
+        class="task-item-edit"
         @keyup.enter="doneEdit"
         @keyup.esc="cancelEdit"
         v-model="beforeEditCache"
@@ -30,16 +30,16 @@
     </div>
     <div
       class="btn-action"
-      :class="{'hide-btn': editing, 'completed': todo.completed}"
-      @click="editTodo(index)"
+      :class="{'hide-btn': editing, 'completed': task.completed}"
+      @click="editTask(index)"
       style="margin-top: 1px"
     >
       <i class="fa fa-edit"></i>
     </div>
     <div
       class="btn-action"
-      :class="{'hide-btn': editing, 'completed': todo.completed}"
-      @click="removeTodo(index)"
+      :class="{'hide-btn': editing, 'completed': task.completed}"
+      @click="removeTask(index)"
     >
       <!-- &times;-->
       <i class="fa fa-trash"></i>
@@ -48,7 +48,7 @@
 </template>
 <script>
 export default {
-  name: "todo-item",
+  name: "task-item",
   data() {
     return {
       editing: false,
@@ -56,7 +56,7 @@ export default {
     };
   },
   props: {
-    todo: {
+    task: {
       type: Object,
       required: true
     },
@@ -85,35 +85,35 @@ export default {
     });
   },
   methods: {
-    removeTodo(index) {
-      eventBus.$emit("removeTodo", index);
+    removeTask(index) {
+      eventBus.$emit("removeTask", index);
     },
-    editTodo(index) {
-      this.beforeEditCache = this.todo.title;
+    editTask(index) {
+      this.beforeEditCache = this.task.title;
       this.editing = true;
       //console.log("Editing:", index);
       //console.log("before:", this.beforeEditCache);
       eventBus.$emit("editItem", index);
     },
     doneEdit() {
-      //console.log("done:", this.todo.title);
-      this.todo.title = this.beforeEditCache;
+      //console.log("done:", this.task.title);
+      this.task.title = this.beforeEditCache;
       this.editing = false;
       eventBus.$emit("finishedEdit", {
         index: this.index,
-        todo: this.todo
+        task: this.task
       });
     },
     cancelEdit() {
       this.editing = false;
     },
     onChecked() {
-      this.todo.completed = !this.todo.completed;
+      this.task.completed = !this.task.completed;
     }
   },
   watch: {
     checkAll() {
-      this.completed = this.checkAll ? true : this.todo.completed;
+      this.completed = this.checkAll ? true : this.task.completed;
     }
   }
 };

@@ -8,7 +8,7 @@
 
 <script>
 export default {
-  name: "todo-check-all",
+  name: "task-check-all",
   props: {
     anyRemaining: {
       type: Boolean,
@@ -17,7 +17,7 @@ export default {
   },
   methods: {
     allChecked() {
-      eventBus.$emit("checkedAllTodos", this.anyRemaining);
+      eventBus.$emit("checkedAllTasks", this.anyRemaining);
     }
   }
 };

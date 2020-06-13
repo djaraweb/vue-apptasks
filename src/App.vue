@@ -1,17 +1,17 @@
 <template>
   <div id="app" class="container">
     <img alt="Vue logo" src="./assets/logo.png" class="logo" />
-    <TodoList msg="Welcome to Your Vue.js App" />
+    <TaskList msg="Welcome to Your Vue.js App" />
   </div>
 </template>
 
 <script>
-import TodoList from "./components/TodoList.vue";
+import TaskList from "./components/TaskList.vue";
 
 export default {
   name: "App",
   components: {
-    TodoList
+    TaskList
   }
 };
 </script>

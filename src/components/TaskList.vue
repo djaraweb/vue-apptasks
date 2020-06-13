@@ -2,28 +2,28 @@
   <div>
     <input
       type="text"
-      class="todo-input"
+      class="task-input"
       placeholder="What needs to be done"
-      v-model="newTodo"
-      @keyup.enter="addTodo"
+      v-model="newTask"
+      @keyup.enter="addTask"
     />
     <transition-group
       name="fade"
       enter-active-class="animated fadeInUp"
       leave-active-class="animated fadeOutDown"
     >
-      <TodoItem
-        v-for="(todo, index) in todosFiltered"
-        :key="todo.id"
+      <TaskItem
+        v-for="(task, index) in tasksFiltered"
+        :key="task.id"
         class="animate__animated animate__bounce"
-        :todo="todo"
+        :task="task"
         :index="index"
         :checkAll="!anyRemaining"
       />
     </transition-group>
     <div class="extra-container">
-      <TodoCheckAll :anyRemaining="anyRemaining" />
-      <TodoItemsRemaining :remaining="remaining" />
+      <TaskCheckAll :anyRemaining="anyRemaining" />
+      <TaskItemsRemaining :remaining="remaining" />
     </div>
     <div class="extra-container">
       <TaskFiltered />
@@ -33,33 +33,33 @@
         </transition>
       </div>
     </div>
-    <div>{{todos}}</div>
+    <div>{{tasks}}</div>
   </div>
 </template>
 
 <script>
-import TodoItem from "./TodoItem";
-import TodoItemsRemaining from "./TodoItemsRemaining";
-import TodoCheckAll from "./TodoCheckAll";
+import TaskItem from "./TaskItem";
+import TaskItemsRemaining from "./TaskItemsRemaining";
+import TaskCheckAll from "./TaskCheckAll";
 import TaskFiltered from "./TaskFiltered";
 import TaskClearCompleted from "./TaskClearCompleted";
 
 export default {
-  name: "TodoList",
+  name: "TaskList",
   components: {
-    TodoItem,
-    TodoItemsRemaining,
-    TodoCheckAll,
+    TaskItem,
+    TaskItemsRemaining,
+    TaskCheckAll,
     TaskFiltered,
     TaskClearCompleted
   },
   data() {
     return {
-      newTodo: "",
-      idForTodo: 4,
+      newTask: "",
+      idForTask: 4,
       beforeEditCache: "",
       filter: "all",
-      todos: [
+      tasks: [
         {
           id: 1,
           title: "Aprender Vue.js",
@@ -82,14 +82,14 @@ export default {
     msg: String
   },
   created() {
-    eventBus.$on("removeTodo", index => {
-      this.removeTodo(index);
+    eventBus.$on("removeTask", index => {
+      this.removeTask(index);
     });
     eventBus.$on("finishedEdit", data => {
       this.finishedEdit(data);
     });
-    eventBus.$on("checkedAllTodos", checked => {
-      this.checkedAllTodos(checked);
+    eventBus.$on("checkedAllTasks", checked => {
+      this.checkedAllTasks(checked);
     });
     eventBus.$on("filterChange", filter => {
       this.filter = filter;
@@ -99,14 +99,14 @@ export default {
     });
   },
   beforeDestroy() {
-    eventBus.$off("removeTodo", index => {
-      this.removeTodo(index);
+    eventBus.$off("removeTask", index => {
+      this.removeTask(index);
     });
     eventBus.$off("finishedEdit", data => {
       this.finishedEdit(data);
     });
-    eventBus.$off("checkedAllTodos", checked => {
-      this.checkedAllTodos(checked);
+    eventBus.$off("checkedAllTasks", checked => {
+      this.checkedAllTasks(checked);
     });
     eventBus.$off("filterChange", filter => {
       this.filter = filter;
@@ -117,47 +117,47 @@ export default {
   },
   computed: {
     remaining() {
-      return this.todos.filter(todo => !todo.completed).length;
+      return this.tasks.filter(task => !task.completed).length;
     },
     anyRemaining() {
       return this.remaining !== 0;
     },
-    todosFiltered() {
-      if (this.filter == "all") return this.todos;
+    tasksFiltered() {
+      if (this.filter == "all") return this.tasks;
       else if (this.filter == "active")
-        return this.todos.filter(todo => !todo.completed);
+        return this.tasks.filter(task => !task.completed);
       else if (this.filter == "completed")
-        return this.todos.filter(todo => todo.completed);
-      return this.todos;
+        return this.tasks.filter(task => task.completed);
+      return this.tasks;
     },
     showClearCompletedButton() {
-      return this.todos.filter(todo => todo.completed).length > 0;
+      return this.tasks.filter(task => task.completed).length > 0;
     }
   },
   methods: {
-    addTodo() {
-      if (this.newTodo.trim() == 0) {
+    addTask() {
+      if (this.newTask.trim() == 0) {
         return;
       }
-      this.todos.push({
-        id: this.idForTodo,
-        title: this.newTodo,
+      this.tasks.push({
+        id: this.idForTask,
+        title: this.newTask,
         completed: false
       });
-      this.newTodo = "";
-      this.idForTodo++;
+      this.newTask = "";
+      this.idForTask++;
     },
-    removeTodo(index) {
-      this.todos.splice(index, 1);
+    removeTask(index) {
+      this.tasks.splice(index, 1);
     },
-    checkedAllTodos() {
-      this.todos.forEach(todo => (todo.completed = event.target.checked));
+    checkedAllTasks() {
+      this.tasks.forEach(task => (task.completed = event.target.checked));
     },
     clearCompleted() {
-      this.todos = this.todos.filter(todo => !todo.completed);
+      this.tasks = this.tasks.filter(task => !task.completed);
     },
     finishedEdit(data) {
-      this.todos.splice(data.index, 1, data.todo);
+      this.tasks.splice(data.index, 1, data.task);
     }
   }
 };
@@ -167,7 +167,7 @@ export default {
 @import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css");
 @import url("https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css");
 
-.todo-input {
+.task-input {
   display: block;
   width: 100%;
   height: 45px;
@@ -183,7 +183,7 @@ export default {
     border: 1px solid #367fa9;
   }
 }
-.todo-item {
+.task-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -194,7 +194,7 @@ export default {
   padding-left: 5px;
   padding-right: 8px;
 }
-.border-todo-item {
+.border-task-item {
   border: 2px solid rgba(46, 108, 202, 0.6);
 }
 .btn-action {
@@ -221,18 +221,18 @@ export default {
   }
 }*/
 
-.todo-item-left {
+.task-item-left {
   display: flex;
   align-items: center;
   width: 100%;
 }
 
-.todo-item-label {
+.task-item-label {
   padding: 10px;
   border: 1px solid white;
   margin-left: 12px;
 }
-.todo-item-edit {
+.task-item-edit {
   display: block;
   width: 90%;
   font-size: 18px;

@@ -4,7 +4,7 @@
 
 <script>
 export default {
-  name: "todo-remaining",
+  name: "task-items-remaining",
   props: {
     remaining: {
       type: Number,
