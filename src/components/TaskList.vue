@@ -22,8 +22,8 @@
       />
     </transition-group>
     <div class="extra-container">
-      <TaskCheckAll :anyRemaining="anyRemaining" />
-      <TaskItemsRemaining :remaining="remaining" />
+      <TaskCheckAll />
+      <TaskItemsRemaining />
     </div>
     <div class="extra-container">
       <TaskFiltered />
@@ -33,7 +33,7 @@
         </transition>
       </div>
     </div>
-    <div>{{tasks}}</div>
+    <div>{{ this.$store.state }}</div>
   </div>
 </template>
 
@@ -56,82 +56,69 @@ export default {
   data() {
     return {
       newTask: "",
-      idForTask: 4,
-      beforeEditCache: "",
-      filter: "all",
-      tasks: [
-        {
-          id: 1,
-          title: "Aprender Vue.js",
-          completed: false
-        },
-        {
-          id: 2,
-          title: "Aprender react en udemy.com",
-          completed: false
-        },
-        {
-          id: 3,
-          title: "Grabar leccion de Vue",
-          completed: true
-        }
-      ]
+      idForTask: 4
     };
   },
   props: {
     msg: String
   },
   created() {
-    eventBus.$on("removeTask", index => {
+    /*eventBus.$on("removeTask", index => {
       this.removeTask(index);
     });
     eventBus.$on("finishedEdit", data => {
       this.finishedEdit(data);
-    });
-    eventBus.$on("checkedAllTasks", checked => {
+    });*/
+    /*eventBus.$on("checkedAllTasks", checked => {
       this.checkedAllTasks(checked);
-    });
-    eventBus.$on("filterChange", filter => {
-      this.filter = filter;
+    });*/
+    /*eventBus.$on("filterChange", filter => {
+      this.$store.state.filter = filter;
     });
     eventBus.$on("clearCompletedTasks", () => {
       this.clearCompleted();
-    });
+    });*/
+
+    this.$store.dispatch("getListTask");
   },
   beforeDestroy() {
-    eventBus.$off("removeTask", index => {
+    /*eventBus.$off("removeTask", index => {
       this.removeTask(index);
     });
     eventBus.$off("finishedEdit", data => {
       this.finishedEdit(data);
-    });
-    eventBus.$off("checkedAllTasks", checked => {
+    });*/
+    /*eventBus.$off("checkedAllTasks", checked => {
       this.checkedAllTasks(checked);
-    });
-    eventBus.$off("filterChange", filter => {
-      this.filter = filter;
-    });
-    eventBus.$off("clearCompletedTasks", () => {
+    });*/
+    /*eventBus.$off("filterChange", filter => {
+      this.$store.state.filter = filter;
+    });*/
+    /*eventBus.$off("clearCompletedTasks", () => {
       this.clearCompleted();
-    });
+    });*/
   },
   computed: {
     remaining() {
-      return this.tasks.filter(task => !task.completed).length;
+      return this.$store.getters.remaining;
+      //return this.$store.state.tasks.filter(task => !task.completed).length;
     },
     anyRemaining() {
-      return this.remaining !== 0;
+      return this.$store.getters.anyRemaining;
+      //return this.remaining !== 0;
     },
     tasksFiltered() {
-      if (this.filter == "all") return this.tasks;
-      else if (this.filter == "active")
-        return this.tasks.filter(task => !task.completed);
-      else if (this.filter == "completed")
-        return this.tasks.filter(task => task.completed);
-      return this.tasks;
+      return this.$store.getters.tasksFiltered;
+      /*if (this.$store.state.filter == "all") return this.$store.state.tasks;
+      else if (this.$store.state.filter == "active")
+        return this.$store.state.tasks.filter(task => !task.completed);
+      else if (this.$store.state.filter == "completed")
+        return this.$store.state.tasks.filter(task => task.completed);
+      return this.$store.state.tasks;*/
     },
     showClearCompletedButton() {
-      return this.tasks.filter(task => task.completed).length > 0;
+      return this.$store.getters.showClearCompletedButton;
+      //return this.$store.state.tasks.filter(task => task.completed).length > 0;
     }
   },
   methods: {
@@ -139,26 +126,34 @@ export default {
       if (this.newTask.trim() == 0) {
         return;
       }
-      this.tasks.push({
-        id: this.idForTask,
+      this.$store.dispatch("addTask", {
         title: this.newTask,
         completed: false
       });
+
+      /*this.$store.commit("SET_ADD_TASK", {
+        id: this.idForTask,
+        title: this.newTask,
+        completed: false
+      });*/
+
       this.newTask = "";
-      this.idForTask++;
-    },
-    removeTask(index) {
-      this.tasks.splice(index, 1);
-    },
-    checkedAllTasks() {
-      this.tasks.forEach(task => (task.completed = event.target.checked));
-    },
-    clearCompleted() {
-      this.tasks = this.tasks.filter(task => !task.completed);
-    },
-    finishedEdit(data) {
-      this.tasks.splice(data.index, 1, data.task);
+      //this.idForTask++;
     }
+    /*removeTask(index) {
+      this.$store.state.tasks.splice(index, 1);
+    },*/
+    /*checkedAllTasks() {
+      this.$store.state.tasks.forEach(task => (task.completed = event.target.checked));
+    },*/
+    /*clearCompleted() {
+      this.$store.state.tasks = this.$store.state.tasks.filter(
+        task => !task.completed
+      );
+    }*/
+    /*finishedEdit(data) {
+      this.$store.state.tasks.splice(data.index, 1, data.task);
+    }*/
   }
 };
 </script>
@@ -203,6 +198,13 @@ export default {
   color: #367fa9;
   &:hover {
     color: black;
+  }
+}
+.btn-action-checked {
+  margin-left: 12px;
+  font-size: 20px;
+  &:hover {
+    color: #367fa9;
   }
 }
 .hide-btn {

@@ -20,7 +20,8 @@ export default {
   methods: {
     changeFiltered(filter) {
       this.filter = filter;
-      eventBus.$emit("filterChange", filter);
+      this.$store.commit("SET_UPDATE_FILTER", filter);
+      //eventBus.$emit("filterChange", filter);
     }
   }
 };

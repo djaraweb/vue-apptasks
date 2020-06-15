@@ -1,5 +1,5 @@
 <template>
-  <div class="task-item" :class="{'border-task-item': editing}">
+  <div class="task-item" :class="{ 'border-task-item': editing }">
     <div class="task-item-left">
       <input type="checkbox" v-model="task.completed" @change="doneEdit" style="display: none" />
       <div class="btn-action" @click="onChecked">
@@ -7,11 +7,9 @@
         <i v-else class="fa fa-check-square-o"></i>
       </div>
 
-      <div
-        v-if="!editing"
-        class="task-item-label"
-        :class="{ completed: task.completed }"
-      >{{ task.title }}</div>
+      <div v-if="!editing" class="task-item-label" :class="{ completed: task.completed }">
+        {{ task.title }}
+      </div>
       <input
         v-else
         type="text"
@@ -22,15 +20,15 @@
         v-focus
       />
     </div>
-    <div class="btn-action" :class="{'hide-btn': !editing}" @click="doneEdit">
+    <div class="btn-action" :class="{ 'hide-btn': !editing }" @click="doneEdit">
       <i class="fa fa-check"></i>
     </div>
-    <div class="btn-action" :class="{'hide-btn': !editing}" @click="cancelEdit">
+    <div class="btn-action" :class="{ 'hide-btn': !editing }" @click="cancelEdit">
       <i class="fa fa-close"></i>
     </div>
     <div
       class="btn-action"
-      :class="{'hide-btn': editing, 'completed': task.completed}"
+      :class="{ 'hide-btn': editing, completed: task.completed }"
       @click="editTask(index)"
       style="margin-top: 1px"
     >
@@ -38,7 +36,7 @@
     </div>
     <div
       class="btn-action"
-      :class="{'hide-btn': editing, 'completed': task.completed}"
+      :class="{ 'hide-btn': editing, completed: task.completed }"
       @click="removeTask(index)"
     >
       <!-- &times;-->
@@ -86,7 +84,13 @@ export default {
   },
   methods: {
     removeTask(index) {
-      eventBus.$emit("removeTask", index);
+      //eventBus.$emit("removeTask", index);
+      //this.$store.commit("SET_DELETE_TASK", index);
+      this.$store.dispatch("destroyTask", {
+        task: this.task,
+        index
+      });
+      //      this.$store.state.tasks.splice(index, 1);
     },
     editTask(index) {
       this.beforeEditCache = this.task.title;
@@ -99,10 +103,13 @@ export default {
       //console.log("done:", this.task.title);
       this.task.title = this.beforeEditCache;
       this.editing = false;
-      eventBus.$emit("finishedEdit", {
+      this.$store.dispatch("updateTask", this.task);
+      //this.$store.commit("SET_UPDATE_TASK", this.task);
+      //this.$store.state.tasks.splice(this.index, 1, this.task);
+      /*eventBus.$emit("finishedEdit", {
         index: this.index,
         task: this.task
-      });
+      });*/
     },
     cancelEdit() {
       this.editing = false;
