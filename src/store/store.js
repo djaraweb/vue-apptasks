@@ -19,10 +19,12 @@ export const store = new Vuex.Store({
       return getters.remaining !== 0;
     },
     tasksFiltered(state) {
-      if (state.filter == "all") return state.tasks;
-      else if (state.filter == "active") return state.tasks.filter(task => !task.completed);
-      else if (state.filter == "completed") return state.tasks.filter(task => task.completed);
-      return state.tasks;
+      let newTasks = [];
+      if (state.filter == "all") newTasks = state.tasks;
+      else if (state.filter == "active") newTasks = state.tasks.filter(task => !task.completed);
+      else if (state.filter == "completed") newTasks = state.tasks.filter(task => task.completed);
+
+      return newTasks;
     },
     showClearCompletedButton(state) {
       return state.tasks.filter(task => task.completed).length > 0;
@@ -53,34 +55,39 @@ export const store = new Vuex.Store({
     }
   },
   actions: {
-    getListTask(contex) {
+    getListTask(context) {
       axios
         .get("/tasks")
         .then(response => {
           let { data } = response;
-          contex.commit("SET_LIST_TASKS", data);
+          context.commit("SET_LIST_TASKS", data);
         })
         .catch(err => {
           console.log(err);
         });
     },
-    addTask(contex, task) {
+    addTask(context, task) {
       axios
         .post("/tasks", task)
         .then(response => {
-          let { data } = response;
-          contex.commit("SET_ADD_TASK", data);
+          let { status } = response;
+          if (status === 200) {
+            context.dispatch("getListTask");
+          }
         })
         .catch(err => {
           console.log(err);
         });
     },
-    destroyTask(contex, data) {
+    destroyTask(context, task) {
       axios
-        .delete("/tasks/" + data.task.id)
+        .delete("/tasks/" + task.id)
         .then(response => {
-          let { data } = response;
-          contex.commit("SET_DELETE_TASK", data.index);
+          let { status } = response;
+          if (status === 200) {
+            context.dispatch("getListTask");
+          }
+          //context.commit("SET_DELETE_TASK", data.index);
         })
         .catch(err => {
           console.log(err);
@@ -91,7 +98,34 @@ export const store = new Vuex.Store({
         .put("/tasks/" + task.id, task)
         .then(response => {
           let { data } = response;
-          contex.commit("SET_UPDATE_TASK", data);
+          context.commit("SET_UPDATE_TASK", data);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+    checkAll(context, checked) {
+      axios
+        .patch("/tasksCheckAll", {
+          completed: checked
+        })
+        .then(response => {
+          context.commit("SET_CHECKED_ALL", checked);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+    clearCompleted({ state }) {
+      const completed = store.state.tasks.filter(task => task.completed).map(task => task.id);
+      axios
+        .delete("/tasksDeleteCompleted", {
+          data: {
+            todos: completed
+          }
+        })
+        .then(response => {
+          context.commit("SET_CLEAR_COMPLETED");
         })
         .catch(err => {
           console.log(err);

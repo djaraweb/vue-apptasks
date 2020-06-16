@@ -7,9 +7,11 @@
         <i v-else class="fa fa-check-square-o"></i>
       </div>
 
-      <div v-if="!editing" class="task-item-label" :class="{ completed: task.completed }">
-        {{ task.title }}
-      </div>
+      <div
+        v-if="!editing"
+        class="task-item-label"
+        :class="{ completed: task.completed }"
+      >{{ task.title }}</div>
       <input
         v-else
         type="text"
@@ -37,7 +39,7 @@
     <div
       class="btn-action"
       :class="{ 'hide-btn': editing, completed: task.completed }"
-      @click="removeTask(index)"
+      @click="removeTask()"
     >
       <!-- &times;-->
       <i class="fa fa-trash"></i>
@@ -77,45 +79,30 @@ export default {
   created() {
     eventBus.$on("editItem", index => {
       if (this.index != index) {
-        //console.log("Discarding:", this.index);
         this.cancelEdit();
       }
     });
   },
   methods: {
-    removeTask(index) {
-      //eventBus.$emit("removeTask", index);
-      //this.$store.commit("SET_DELETE_TASK", index);
-      this.$store.dispatch("destroyTask", {
-        task: this.task,
-        index
-      });
-      //      this.$store.state.tasks.splice(index, 1);
+    removeTask() {
+      this.$store.dispatch("destroyTask", this.task);
     },
     editTask(index) {
       this.beforeEditCache = this.task.title;
       this.editing = true;
-      //console.log("Editing:", index);
-      //console.log("before:", this.beforeEditCache);
       eventBus.$emit("editItem", index);
     },
     doneEdit() {
-      //console.log("done:", this.task.title);
       this.task.title = this.beforeEditCache;
       this.editing = false;
       this.$store.dispatch("updateTask", this.task);
-      //this.$store.commit("SET_UPDATE_TASK", this.task);
-      //this.$store.state.tasks.splice(this.index, 1, this.task);
-      /*eventBus.$emit("finishedEdit", {
-        index: this.index,
-        task: this.task
-      });*/
     },
     cancelEdit() {
       this.editing = false;
     },
     onChecked() {
       this.task.completed = !this.task.completed;
+      this.$store.dispatch("updateTask", this.task);
     }
   },
   watch: {
