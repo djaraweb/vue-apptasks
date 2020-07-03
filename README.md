@@ -1,18 +1,26 @@
 # vuetodoapp.djara.dev
 
-## Project setup
+# Aplicación Administracion de tareas, integrando con API Rest en Laravel
+
+## Descripcion
 
 ```
-npm install
+En esta aplicacion, se realizan practicas uzando vuex para el control de estados en Vue.
+Ademas establecemos una conexion con la Base de datos en Mysql y ApiRest en Laravel.
+
 ```
 
-### Compiles and hot-reloads for development
+## Frontend de la Aplicacion
+
+![Interfaz de tareas](src/assets/static/Screenshot_1.png)
+
+### Compila y recarga los archivos en modo Desarrollo
 
 ```
 npm run serve
 ```
 
-### Compiles and minifies for production
+### Compila y Minimiza los archivos para el despliegue de Producción
 
 ```
 npm run build
