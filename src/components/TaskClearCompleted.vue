@@ -13,7 +13,7 @@ export default {
   },
   methods: {
     clearCompleted() {
-      this.$store.commit("SET_CLEAR_COMPLETED");
+      this.$store.dispatch("clearCompleted");
       //eventBus.$emit("clearCompletedTasks");
     }
   }

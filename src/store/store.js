@@ -2,16 +2,18 @@ import Vue from "vue";
 import Vuex from "vuex";
 import axios from "axios";
 Vue.use(Vuex);
-axios.defaults.baseURL = "http://apirest-laravel.com/api/";
+axios.defaults.baseURL = process.env.VUE_APP_API_URL;
 
 export const store = new Vuex.Store({
   state: {
     statusCode: 200,
 
     filter: "all",
-    tasks: []
+    tasks: [],
+    isLoading: true
   },
   getters: {
+    isLoading: (state) => (state.isLoading),
     remaining(state) {
       return state.tasks.filter(task => !task.completed).length;
     },
@@ -52,21 +54,28 @@ export const store = new Vuex.Store({
     SET_UPDATE_TASK(state, task) {
       let index = state.tasks.findIndex(item => item.id === task.id);
       state.tasks.splice(index, 1, task);
-    }
+    },
+    SET_LOADING(state, load) {
+      state.isLoading = load;
+    },
   },
   actions: {
     getListTask(context) {
+      context.commit("SET_LOADING",true);
       axios
         .get("/tasks")
         .then(response => {
           let { data } = response;
-          context.commit("SET_LIST_TASKS", data);
+          context.commit("SET_LIST_TASKS", data.body.tasks);
         })
         .catch(err => {
           console.log(err);
+        }).finally(() => {
+          context.commit("SET_LOADING",false);
         });
     },
     addTask(context, task) {
+      context.commit("SET_LOADING",true);
       axios
         .post("/tasks", task)
         .then(response => {
@@ -77,9 +86,12 @@ export const store = new Vuex.Store({
         })
         .catch(err => {
           console.log(err);
-        });
+        }).finally(() => {
+          context.commit("SET_LOADING",false);
+        });;
     },
     destroyTask(context, task) {
+      context.commit("SET_LOADING",true);
       axios
         .delete("/tasks/" + task.id)
         .then(response => {
@@ -91,9 +103,12 @@ export const store = new Vuex.Store({
         })
         .catch(err => {
           console.log(err);
-        });
+        }).finally(() => {
+          context.commit("SET_LOADING",false);
+        });;
     },
     updateTask(context, task) {
+      context.commit("SET_LOADING",true);
       axios
         .put("/tasks/" + task.id, task)
         .then(response => {
@@ -102,9 +117,12 @@ export const store = new Vuex.Store({
         })
         .catch(err => {
           console.log(err);
+        }).finally(() => {
+          context.commit("SET_LOADING",false);
         });
     },
     checkAll(context, checked) {
+      context.commit("SET_LOADING",true);
       axios
         .patch("/tasksCheckAll", {
           completed: checked
@@ -114,14 +132,17 @@ export const store = new Vuex.Store({
         })
         .catch(err => {
           console.log(err);
-        });
+        }).finally(() => {
+          context.commit("SET_LOADING",false);
+        });;
     },
-    clearCompleted({ state }) {
+    clearCompleted(context) {
+      context.commit("SET_LOADING",true);
       const completed = store.state.tasks.filter(task => task.completed).map(task => task.id);
       axios
         .delete("/tasksDeleteCompleted", {
           data: {
-            todos: completed
+            tasks: completed
           }
         })
         .then(response => {
@@ -129,7 +150,9 @@ export const store = new Vuex.Store({
         })
         .catch(err => {
           console.log(err);
-        });
+        }).finally(() => {
+          context.commit("SET_LOADING",false);
+        });;
     }
   }
 });

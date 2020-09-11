@@ -1,12 +1,12 @@
-# vuetodoapp.djara.dev
+#### vueapptasks
 
 # Aplicación Administracion de tareas, integrando con API Rest en Laravel
 
-## Descripcion
+### Descripción
 
 ```
-En esta aplicacion, se realizan practicas uzando vuex para el control de estados en Vue.
-Ademas establecemos una conexion con la Base de datos en Mysql y ApiRest en Laravel.
+En esta aplicacion, se realizan prácticas usando el framework de Vue y controlando los estados con vuex.
+Además establecemos una conexion con la Base de datos en Mysql y ApiRest en Laravel.
 
 ```
 
@@ -20,8 +20,14 @@ Ademas establecemos una conexion con la Base de datos en Mysql y ApiRest en Lara
 npm run serve
 ```
 
-### Compila y Minimiza los archivos para el despliegue de Producción
+### Despliegue de App en Producción
 
 ```
 npm run build
 ```
+
+### App Online en Netlify
+[Ver Demo Aqui][1]
+
+[1]: https://www.netlify.com/
+

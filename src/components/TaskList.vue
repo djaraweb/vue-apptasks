@@ -7,20 +7,19 @@
       v-model="newTask"
       @keyup.enter="addTask"
     />
-    <transition-group
-      name="fade"
-      enter-active-class="animated fadeInUp"
-      leave-active-class="animated fadeOutDown"
-    >
-      <TaskItem
-        v-for="(task, index) in tasksFiltered"
-        :key="task.id"
-        class="animate__animated animate__bounce"
-        :task="task"
-        :index="index"
-        :checkAll="!anyRemaining"
-      />
-    </transition-group>
+    <div class="text-center" v-if="this.$store.getters.isLoading">
+      <i class="fa fa-spinner fa-pulse fa-3x fa-fw"></i>
+      <span class="sr-only">Loading...</span>
+    </div>
+    <div v-else>
+        <TaskItem
+          v-for="(task, index) in tasksFiltered"
+          :key="task.id"
+          :task="task"
+          :index="index"
+          :checkAll="!anyRemaining"
+        />
+    </div>
     <div class="extra-container">
       <TaskCheckAll />
       <TaskItemsRemaining />
@@ -62,6 +61,7 @@ export default {
   },
   created() {
     this.$store.dispatch("getListTask");
+
   },
   computed: {
     remaining() {
@@ -93,7 +93,6 @@ export default {
 </script>
 
 <style lang="scss">
-@import url("https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css");
 @import url("https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css");
 
 .task-input {
